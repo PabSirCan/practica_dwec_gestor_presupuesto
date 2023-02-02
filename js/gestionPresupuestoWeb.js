@@ -20,12 +20,13 @@ function mostrarGastoWeb(idElemento, gasto)
 
         let gastoDescripcion = document.createElement('div');
         gastoDescripcion.className = "gasto-descripcion";
-        gastoDescripcion.innerHTML += gasto.descricpion;
+        gastoDescripcion.innerHTML = gasto.descripcion;
         divGasto.append(gastoDescripcion);
 
         let gastoFecha = document.createElement('div');
         gastoFecha.className = "gasto-fecha";
-        gastoFecha.innerHTML += gasto.fecha;
+        let TxtFecha = new Date(gasto.fecha);
+        gastoFecha.innerHTML += TxtFecha.toLocaleString();
         divGasto.append(gastoFecha);
 
         let gastoValor = document.createElement('div');
@@ -35,9 +36,6 @@ function mostrarGastoWeb(idElemento, gasto)
 
         let gastoEtiqueta = document.createElement('div');
         gastoEtiqueta.className = "gasto-etiquetas";
-        
-        let handleBorrarEtiq = document.createElement("div");
-        handleBorrarEtiq.gasto = gasto;
 
         for(let i = 0; i < gasto.etiquetas.length; i++){
             let divGastoEtiquetasEtiqueta = document.createElement('span');
@@ -55,6 +53,9 @@ function mostrarGastoWeb(idElemento, gasto)
         }
 
         divGasto.append(gastoEtiqueta);
+
+        let handleBorrarEtiq = document.createElement("div");
+        handleBorrarEtiq.gasto = gasto;
         
         element.append(divGasto);
         
@@ -81,6 +82,18 @@ function mostrarGastoWeb(idElemento, gasto)
         
         gastoEtiqueta.addEventListener("click", handleBorrarEtiq);
 
+        let btnGastosBorrarAPI = document.createElement("button");
+        btnGastosBorrarAPI.className = "gasto-borrar-api";
+        btnGastosBorrarAPI.elemento = "gasto-borrar-api";
+        btnGastosBorrarAPI.type = "button";
+        btnGastosBorrarAPI.textContent = "Borrar(API)";
+
+        let handleBorrarApi = new borrarApiHandle();
+        handleBorrarApi.gasto = gasto;
+
+        btnGastosBorrarAPI.addEventListener("click", handleBorrarApi);
+        divGasto.append(btnGastosBorrarAPI);
+
         let btnEditForm = document.createElement("button");
         btnEditForm.className = "gasto-editar-formulario";
         btnEditForm.elemento = "gasto-editar-formulario";
@@ -92,6 +105,12 @@ function mostrarGastoWeb(idElemento, gasto)
         handleEditForm.gasto = gasto;
         btnEditForm.addEventListener('click', handleEditForm);
         divGasto.append(btnEditForm);
+
+        let btnGastosEnviarAPI = document.createElement("button");
+        btnGastosEnviarAPI.className = "gasto-enviar-api";
+        btnGastosEnviarAPI.elemento = "gasto-enviar-api";
+        btnGastosEnviarAPI.type = "button";
+        btnGastosEnviarAPI.textContent = "Enviar(API)";
 
         divGasto.append(gastoEtiqueta);
         element.append(divGasto);
@@ -387,6 +406,94 @@ function cargarGastosWeb()
 let cargarFormulario = document.getElementById("cargar-gastos");
 cargarFormulario.addEventListener("click", cargarGastosWeb)
 
+function cargarGastosApi()
+{
+    let userName = document.getElementById("nombre_usuario").value;
+    let url = `https://suhhtqjccd.execute-api.eu-west-1.amazonaws.com/latest/${userName};`
+
+    fetch (url, {method: 'Get'})
+
+    .then (response => response.json())
+    .then (data =>
+        {
+            console.log(data);
+            gestionP.cargarGastos(data);
+            repintar();   
+        })
+    
+    .catch (error => console.log(error));
+}
+
+function cargarGastosApiHandle()
+{
+    this.handleEvent = function(event)
+    {
+        event.preventDefault();
+        cargarGastosApi();
+    }
+}
+
+let btonCargarGastoApi = document.getElementById("cargar-gastos-api")
+btonCargarGastoApi.addEventListener('click', new cargarGastosApiHandle());
+
+function EnviarApiHandle()
+{
+    this.handleEvent = function(event)
+    {
+        event.preventDefault();
+        let userName = document.getElementById("nombre_usuario").value;
+        let url = `https://suhhtqjccd.execute-api.eu-west-1.amazonaws.com/latest/${userName};`
+        let form = document.forms[0];
+
+        let newGasto = {
+            descripcion : form.elements.descripcion.value,
+            fecha: form.elements.fecha.value,
+            valor: form.elements.valor.value,
+            etiquetas: form.elements.etiquetas.value.split(","),
+            usuario:userName
+        }
+
+        fetch(url, {
+            method: 'Post',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify(newGasto)
+        })
+
+        .then (response => response.json())
+        .then (data => {
+            console.log (data);
+            cargarGastosApi();
+        })
+        .catch(error => console.log(error));
+    }
+
+}
+
+function borrarApiHandle()
+{
+    this.handleEvent = function(event)
+    {
+
+    }
+}
+
+
+function nuevoGastoApiHandle()
+{
+    this.handleEvent = function(event)
+    {
+
+    }
+}
+
+function editarGastoApiHandle()
+{
+    this.handleEvent = function(event)
+    {
+
+    }
+}
+
 export{
     mostrarDatoEnId,
     mostrarGastoWeb,
@@ -399,6 +506,11 @@ export{
     BorrarEtiquetasHandle,
     nuevoGastoWebFormulario,
     guardarGastosWeb,
-    cargarGastosWeb
+    cargarGastosWeb,
+    cargarGastosApi,
+    EnviarApiHandle,
+    borrarApiHandle,
+    nuevoGastoApiHandle,
+    editarGastoApiHandle
 }
 
