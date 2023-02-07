@@ -241,7 +241,7 @@ function BorrarEtiquetasHandle()
 function nuevoGastoWebFormulario()
 {
     let plantillaForm = document.getElementById("formulario-template").content.cloneNode(true);;
-    var form = plantillaForm.querySelector("form");
+    let form = plantillaForm.querySelector("form");
 
     let formControles = document.getElementById("controlesprincipales");
     formControles.appendChild(form);
@@ -251,6 +251,10 @@ function nuevoGastoWebFormulario()
 
     let btnEnviar = new EnviarFormHandle();
     form.addEventListener("submit", btnEnviar);
+
+    let btonEnviarAPI = document.querySelector("button.gasto-enviar-api");
+    let objtoAPI = new EnviarApiHandle();
+    btonEnviarAPI.addEventListener("click", objtoAPI);
 
     let btnCancelar = formControles.querySelector("button.cancelar");
     let cancelar = new btnCancelarHandle();
@@ -409,9 +413,9 @@ cargarFormulario.addEventListener("click", cargarGastosWeb)
 function cargarGastosApi()
 {
     let userName = document.getElementById("nombre_usuario").value;
-    let url = `https://suhhtqjccd.execute-api.eu-west-1.amazonaws.com/latest/${userName};`
+    let url = `https://suhhtqjccd.execute-api.eu-west-1.amazonaws.com/latest/${userName}`;
 
-    fetch (url, {method: 'Get'})
+    fetch (url, {method: 'GET'})
 
     .then (response => response.json())
     .then (data =>
@@ -433,41 +437,39 @@ function cargarGastosApiHandle()
     }
 }
 
-let btonCargarGastoApi = document.getElementById("cargar-gastos-api")
-btonCargarGastoApi.addEventListener('click', new cargarGastosApiHandle());
-
 function EnviarApiHandle()
 {
     this.handleEvent = function(event)
     {
         event.preventDefault();
         let userName = document.getElementById("nombre_usuario").value;
-        let url = `https://suhhtqjccd.execute-api.eu-west-1.amazonaws.com/latest/${userName};`
-        let form = document.forms[0];
+        let form = event.currentTarget.form;
+        let url = `https://suhhtqjccd.execute-api.eu-west-1.amazonaws.com/latest/${userName}`;
+
 
         let newGasto = {
-            descripcion : form.elements.descripcion.value,
+            descripcion: form.elements.descripcion.value,
             fecha: form.elements.fecha.value,
             valor: form.elements.valor.value,
             etiquetas: form.elements.etiquetas.value.split(","),
-            usuario:userName
         }
 
         fetch(url, {
-            method: 'Post',
-            headers: {'Content-Type':'application/json'},
+            method: 'POST',
+            headers: {'Content-Type':'application/json; charset=UTF-8'},
             body: JSON.stringify(newGasto)
         })
 
         .then (response => response.json())
+        .catch(error => console.log(error))
         .then (data => {
-            console.log (data);
             cargarGastosApi();
         })
-        .catch(error => console.log(error));
     }
 
 }
+
+
 
 function borrarApiHandle()
 {
