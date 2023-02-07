@@ -478,7 +478,18 @@ function borrarApiHandle()
 {
     this.handleEvent = function(event)
     {
+        event.preventDefault();
+        let userName = document.getElementById("nombre_usuario").value;
+        let url = `https://suhhtqjccd.execute-api.eu-west-1.amazonaws.com/latest/${userName}`;
 
+        fetch(url +"/"+this.gasto.gastoId, {method: 'Delete'})
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                gp.borrarGasto(this.gasto.gastoId);
+                cargarGastosApiHandle();
+            })
+            .catch(err => console.log(err));
     }
 }
 
