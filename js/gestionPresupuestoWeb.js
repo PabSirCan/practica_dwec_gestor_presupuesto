@@ -428,6 +428,9 @@ function cargarGastosApi()
     .catch (error => console.log(error));
 }
 
+let btncargarGastoApi = document.getElementById("cargar-gastos-api");
+btncargarGastoApi.addEventListener('click',new cargarGastosApiHandle());
+
 function cargarGastosApiHandle()
 {
     this.handleEvent = function(event)
