@@ -297,6 +297,11 @@ function EditarHandleFormulario()
         btnEditarForm.after(form);
         btnEditarForm.disabled = true;
 
+        let btnEditarAPI = form.querySelector("button.gasto-enviar-api");
+        let editAPI = new editarGastoApiHandle();
+        editAPI.gasto = this.gasto;
+        btnEditarAPI.addEventListener('click', editAPI);
+
         form.elements.descripcion.value = this.gasto.descripcion;
         form.elements.valor.value = this.gasto.valor;
         form.elements.fecha.value = this.gasto.fecha
@@ -487,26 +492,43 @@ function borrarApiHandle()
             .then(data => {
                 console.log(data);
                 gp.borrarGasto(this.gasto.gastoId);
-                cargarGastosApiHandle();
             })
-            .catch(err => console.log(err));
-    }
-}
-
-
-function nuevoGastoApiHandle()
-{
-    this.handleEvent = function(event)
-    {
-
+            .then (cargarGastosApi())
+            .catch(error => console.log(error))
     }
 }
 
 function editarGastoApiHandle()
 {
-    this.handleEvent = function(event)
-    {
+    this.handleEvent= function(event){
+        event.preventDefault();
+        let userName = document.getElementById("nombre_usuario").value;
+        let url = `https://suhhtqjccd.execute-api.eu-west-1.amazonaws.com/latest/${userName}`;
+        let form = event.currentTarget.form;
 
+        let descripcionAPI = form.elements.descripcion.value;
+        let valorAPI = Number(form.elements.valor.value);
+        let fechaAPI = form.elements.fecha.value;
+        let etiquetasAPI = form.elements.etiquetas.value.split(",");
+        
+        let newGasto = 
+        {
+            descripcion: descripcionAPI,
+            valor: valorAPI,
+            fecha: fechaAPI,
+            etiquetas: etiquetasAPI,
+        };
+
+        fetch(url + "/" + this.gasto.gastoId,
+        {method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newGasto)})
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                cargarGastosApi();
+            })
+            .catch(err => console.log(err));
     }
 }
 
@@ -526,7 +548,6 @@ export{
     cargarGastosApi,
     EnviarApiHandle,
     borrarApiHandle,
-    nuevoGastoApiHandle,
     editarGastoApiHandle
 }
 
